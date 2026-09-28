@@ -54,7 +54,7 @@ const services = [
     <div class="hero-visual">
       <div class="hero-gear" data-hero="gear"><Gear teeth={24} /></div>
       <div class="hero-gear small" data-hero="gear"><Gear teeth={12} size={200} /></div>
-      <figure class="hero-photo" data-hero="photo">
+      <figure class="hero-photo" data-hero="photo" data-cursor="Hello!">
         <img src={url('/avatar.webp')} alt={`Portrait of ${profile.name}`} width="440" height="440" fetchpriority="high" />
       </figure>
     </div>
@@ -114,7 +114,7 @@ const services = [
       </div>
       {
         featured.map((p, i) => (
-          <article class="card" data-hscroll-card>
+          <article class="card" data-hscroll-card data-cursor={p.href ? 'Visit' : 'Code'}>
             <div class="card-top">
               <span class="card-index">{String(i + 1).padStart(2, '0')}</span>
               <span class="chip">{p.kind}</span>

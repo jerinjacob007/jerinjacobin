@@ -199,15 +199,12 @@ p {
   white-space: nowrap;
 }
 
-/* Hide animated elements until GSAP takes over, but only when JS is running
-   and the visitor hasn't asked for reduced motion. A failsafe in the layout
-   removes .js if the animation script never loads. */
-@media (prefers-reduced-motion: no-preference) {
-  .js [data-reveal],
-  .js [data-hero],
-  .js [data-split] {
-    visibility: hidden;
-  }
+/* Hide animated elements until GSAP takes over (only when JS is running).
+   A failsafe in the layout removes .js if the animation script never loads. */
+.js [data-reveal],
+.js [data-hero],
+.js [data-split] {
+  visibility: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

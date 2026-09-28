@@ -25,7 +25,7 @@ const groups = [
         </h2>
         <ul class="list">
           {g.items.map((p) => (
-            <li class="row" data-reveal>
+            <li class="row" data-reveal data-cursor={p.href ? 'Visit' : 'Code'}>
               <a href={p.href ?? p.repo} target="_blank" rel="noopener">
                 <span class="year">{p.year}</span>
                 <span class="main">

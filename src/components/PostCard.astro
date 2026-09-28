@@ -10,7 +10,7 @@ const { post } = Astro.props;
 const date = post.data.pubDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
 
-<a class="post" href={url(`/blog/${post.id}/`)} data-reveal>
+<a class="post" href={url(`/blog/${post.id}/`)} data-reveal data-cursor="Read">
   <time class="label" datetime={post.data.pubDate.toISOString()}>{date}</time>
   <div class="post-body">
     <h3>{post.data.title}</h3>

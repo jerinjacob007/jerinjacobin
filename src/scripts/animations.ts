@@ -5,12 +5,14 @@ import { SplitText } from 'gsap/SplitText';
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
 const root = document.documentElement;
+const MOUSE = '(any-pointer: fine) and (any-hover: hover)';
 let mm: gsap.MatchMedia | null = null;
 
 // The client router copies <html> attributes from the incoming page, which
 // drops the classes we set at runtime, so restore them after every swap.
 document.addEventListener('astro:after-swap', () => {
   root.classList.add('js', 'anim-ready');
+  if (cursorActive) root.classList.add('has-cursor');
 });
 
 document.addEventListener('astro:before-swap', () => {
@@ -23,31 +25,35 @@ document.addEventListener('astro:page-load', () => {
   mm?.revert();
   mm = gsap.matchMedia();
 
+  // Visitors who ask their OS to reduce motion still get a lively page
+  // (fades, counters, scroll-lit text, the custom cursor), but not large
+  // movement: no flying letters, spinning gears, marquee or pinned gallery.
   mm.add(
     {
-      motion: '(prefers-reduced-motion: no-preference)',
+      full: '(prefers-reduced-motion: no-preference)',
       desktop: '(min-width: 900px)',
-      finePointer: '(pointer: fine)',
+      mouse: MOUSE,
     },
     (ctx) => {
-      const { motion, desktop, finePointer } = ctx.conditions as Record<string, boolean>;
-      if (!motion) return;
-
+      const { full, desktop, mouse } = ctx.conditions as Record<string, boolean>;
       const cleanups: Array<() => void> = [];
-      hero();
-      splitHeadings();
-      reveals();
+
+      hero(full);
+      splitHeadings(full);
+      reveals(full);
       counters();
-      gears();
-      marquee();
-      navOnScroll(cleanups);
+      scrollFill();
       readingProgress();
       timeline();
-      scrollFill();
-      if (desktop) horizontalGallery();
-      if (finePointer) {
-        magnetic(cleanups);
-        hoverCursorTargets(cleanups);
+      navOnScroll(cleanups);
+      if (full) {
+        gears();
+        marquee();
+        if (desktop) horizontalGallery();
+      }
+      if (mouse) {
+        if (full) magnetic(cleanups);
+        cursorTargets(cleanups);
       }
 
       return () => cleanups.forEach((fn) => fn());
@@ -55,16 +61,17 @@ document.addEventListener('astro:page-load', () => {
   );
 });
 
-// Cursor lives outside the page (transition:persist), so it's set up once.
-initCursor();
-
-function hero() {
+function hero(full: boolean) {
   const heroEls = gsap.utils.toArray<HTMLElement>('[data-hero]');
   if (!heroEls.length) return;
   gsap.set(heroEls, { autoAlpha: 1 });
 
-  const tl = gsap.timeline({ defaults: { ease: 'expo.out', duration: 1.2 } });
+  if (!full) {
+    gsap.from(heroEls, { autoAlpha: 0, duration: 1, stagger: 0.12, ease: 'power1.out' });
+    return;
+  }
 
+  const tl = gsap.timeline({ defaults: { ease: 'expo.out', duration: 1.2 } });
   const name = document.querySelector<HTMLElement>('[data-hero="name"]');
   if (name) {
     const split = SplitText.create(name, { type: 'lines,chars', mask: 'lines', linesClass: 'hero-line' });
@@ -75,8 +82,16 @@ function hero() {
     .from('[data-hero="fade"]', { y: 30, autoAlpha: 0, stagger: 0.1 }, 0.6);
 }
 
-function splitHeadings() {
+function splitHeadings(full: boolean) {
   gsap.utils.toArray<HTMLElement>('[data-split]').forEach((el) => {
+    if (!full) {
+      gsap.fromTo(
+        el,
+        { autoAlpha: 0 },
+        { autoAlpha: 1, duration: 1, scrollTrigger: { trigger: el, start: 'top 90%', once: true } },
+      );
+      return;
+    }
     gsap.set(el, { autoAlpha: 1 });
     SplitText.create(el, {
       type: 'lines',
@@ -94,14 +109,14 @@ function splitHeadings() {
   });
 }
 
-function reveals() {
+function reveals(full: boolean) {
   ScrollTrigger.batch('[data-reveal]', {
     start: 'top 90%',
     once: true,
     onEnter: (batch) =>
       gsap.fromTo(
         batch,
-        { autoAlpha: 0, y: 50 },
+        { autoAlpha: 0, y: full ? 50 : 0 },
         { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.1, overwrite: true },
       ),
   });
@@ -270,12 +285,26 @@ function magnetic(cleanups: Array<() => void>) {
   });
 }
 
-function hoverCursorTargets(cleanups: Array<() => void>) {
-  const cursor = document.querySelector('.cursor');
-  if (!cursor) return;
-  const on = () => cursor.classList.add('is-hover');
-  const off = () => cursor.classList.remove('is-hover');
-  document.querySelectorAll('a, button, [data-cursor]').forEach((el) => {
+/* ---------- Custom cursor ----------
+   Replaces the system arrow for mouse users: a small dot that tracks the
+   pointer exactly, and a ring that trails behind it. The ring grows over
+   links and shows a label (data-cursor="View") over cards. It lives outside
+   the page (transition:persist), so it's created once. */
+
+let cursorActive = false;
+const cursorEl = document.querySelector<HTMLElement>('.cursor');
+const ringLabel = cursorEl?.querySelector<HTMLElement>('.cursor-label');
+
+function cursorTargets(cleanups: Array<() => void>) {
+  if (!cursorEl) return;
+  document.querySelectorAll<HTMLElement>('a, button, [data-cursor]').forEach((el) => {
+    const on = () => {
+      const label = el.closest<HTMLElement>('[data-cursor]')?.dataset.cursor;
+      cursorEl.classList.toggle('is-label', !!label);
+      cursorEl.classList.toggle('is-hover', !label);
+      if (ringLabel) ringLabel.textContent = label ?? '';
+    };
+    const off = () => cursorEl.classList.remove('is-hover', 'is-label');
     el.addEventListener('pointerenter', on);
     el.addEventListener('pointerleave', off);
     cleanups.push(() => {
@@ -283,34 +312,55 @@ function hoverCursorTargets(cleanups: Array<() => void>) {
       el.removeEventListener('pointerleave', off);
     });
   });
-  cleanups.push(off);
+  cleanups.push(() => cursorEl.classList.remove('is-hover', 'is-label'));
 }
 
 function initCursor() {
-  const fine = window.matchMedia('(pointer: fine) and (prefers-reduced-motion: no-preference)');
-  const dot = document.querySelector<HTMLElement>('.cursor-dot');
-  const ring = document.querySelector<HTMLElement>('.cursor-ring');
-  if (!fine.matches || !dot || !ring) return;
+  const dot = cursorEl?.querySelector<HTMLElement>('.cursor-dot');
+  const ring = cursorEl?.querySelector<HTMLElement>('.cursor-ring');
+  if (!cursorEl || !dot || !ring || !window.matchMedia(MOUSE).matches) return;
 
-  const dotX = gsap.quickTo(dot, 'x', { duration: 0.1, ease: 'power3' });
-  const dotY = gsap.quickTo(dot, 'y', { duration: 0.1, ease: 'power3' });
-  const ringX = gsap.quickTo(ring, 'x', { duration: 0.5, ease: 'power3' });
-  const ringY = gsap.quickTo(ring, 'y', { duration: 0.5, ease: 'power3' });
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lag = reduce ? 0.05 : 0.45;
+  const dotX = gsap.quickTo(dot, 'x', { duration: 0.08, ease: 'power3' });
+  const dotY = gsap.quickTo(dot, 'y', { duration: 0.08, ease: 'power3' });
+  const ringX = gsap.quickTo(ring, 'x', { duration: lag, ease: 'power3' });
+  const ringY = gsap.quickTo(ring, 'y', { duration: lag, ease: 'power3' });
   let visible = false;
 
+  const show = (x: number, y: number) => {
+    gsap.set([dot, ring], { x, y });
+    gsap.to(cursorEl, { autoAlpha: 1, duration: 0.25 });
+    visible = true;
+  };
+
   window.addEventListener('pointermove', (e) => {
-    if (!visible) {
-      gsap.set([dot, ring], { x: e.clientX, y: e.clientY });
-      gsap.to([dot, ring], { opacity: 1, duration: 0.3 });
-      visible = true;
+    if (e.pointerType !== 'mouse') return;
+    if (!cursorActive) {
+      cursorActive = true;
+      root.classList.add('has-cursor');
     }
+    if (!visible) show(e.clientX, e.clientY);
     dotX(e.clientX);
     dotY(e.clientY);
     ringX(e.clientX);
     ringY(e.clientY);
   });
-  document.addEventListener('pointerleave', () => {
-    gsap.to([dot, ring], { opacity: 0, duration: 0.3 });
+  window.addEventListener('pointerdown', () => cursorEl.classList.add('is-down'));
+  window.addEventListener('pointerup', () => cursorEl.classList.remove('is-down'));
+  document.documentElement.addEventListener('pointerleave', () => {
+    gsap.to(cursorEl, { autoAlpha: 0, duration: 0.25 });
     visible = false;
   });
+  // A touch or pen on a hybrid device: hand back the system cursor.
+  window.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' && cursorActive) {
+      cursorActive = false;
+      root.classList.remove('has-cursor');
+      gsap.set(cursorEl, { autoAlpha: 0 });
+      visible = false;
+    }
+  });
 }
+
+initCursor();
