@@ -3,11 +3,11 @@ import { url } from '../utils/url';
 import Base from '../layouts/Base.astro';
 import PageHeader from '../components/PageHeader.astro';
 import Gear from '../components/Gear.astro';
-import { profile, skills, journey } from '../data/profile';
+import { profile, skills, experience } from '../data/profile';
 ---
 
 <Base title="About" description={profile.bio}>
-  <PageHeader label="About" title="Engineer by degree. Builder by heart." />
+  <PageHeader label="About" title="Engineer by degree. Developer by heart." />
 
   <section class="wrap intro">
     <figure class="portrait" data-reveal>
@@ -17,32 +17,30 @@ import { profile, skills, journey } from '../data/profile';
     <div class="bio">
       <p class="lead" data-reveal>{profile.bio}</p>
       {profile.about.map((p) => <p data-reveal>{p}</p>)}
-      <p data-reveal>
-        Today I'm building <a href="https://getaix.com" target="_blank" rel="noopener">Getaix</a>, the largest
-        marketplace for App Inventor extensions, and working on{' '}
-        <a href="https://www.casagbic.com" target="_blank" rel="noopener">Casagbic</a>, a no-code Android app builder.
-      </p>
       <dl class="facts" data-reveal>
         <div><dt class="label">Based in</dt><dd>{profile.location}</dd></div>
-        <div><dt class="label">Focus</dt><dd>React · Node.js · No-code</dd></div>
+        <div><dt class="label">Education</dt><dd>B.Tech, Mechanical Eng.</dd></div>
+        <div><dt class="label">Languages</dt><dd>{profile.languages.join(' · ')}</dd></div>
         <div><dt class="label">Status</dt><dd>{profile.available ? 'Open to work' : 'Busy'}</dd></div>
       </dl>
+      <p class="hobbies" data-reveal><span class="label">Off the clock</span> {profile.hobbies.join(' · ')}</p>
     </div>
   </section>
 
   <section class="section wrap">
-    <p class="label">Journey</p>
-    <h2 class="section-title" data-split>How I got here</h2>
+    <p class="label">Experience</p>
+    <h2 class="section-title" data-split>Where I've worked</h2>
     <div class="timeline" data-timeline>
       <span class="timeline-line" data-timeline-line aria-hidden="true"></span>
       <ol>
       {
-        journey.map((j) => (
+        experience.map((j) => (
           <li class="t-item" data-timeline-item data-reveal>
             <span class="node" aria-hidden="true" />
-            <span class="t-year">{j.year}</span>
+            <span class="t-year">{j.period}</span>
             <div>
               <h3>{j.title}</h3>
+              <p class="t-org">{j.org}</p>
               <p>{j.text}</p>
             </div>
           </li>
@@ -186,7 +184,7 @@ import { profile, skills, journey } from '../data/profile';
 
   @media (min-width: 720px) {
     .t-item {
-      grid-template-columns: 7rem 1fr;
+      grid-template-columns: 8.5rem 1fr;
     }
   }
 
@@ -209,6 +207,20 @@ import { profile, skills, journey } from '../data/profile';
   .t-item h3 {
     font-size: clamp(1.5rem, 3vw, 2.25rem);
     margin-bottom: 0.5rem;
+  }
+
+  .t-item .t-org {
+    color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  .hobbies {
+    font-size: 1rem;
+  }
+
+  .hobbies .label {
+    margin-right: 0.75rem;
   }
 
   .t-item p {

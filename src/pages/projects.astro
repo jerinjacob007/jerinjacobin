@@ -4,17 +4,17 @@ import PageHeader from '../components/PageHeader.astro';
 import { projects } from '../data/profile';
 
 const groups = [
-  { title: 'Platforms', items: projects.filter((p) => p.kind === 'Platform') },
-  { title: 'Tools & libraries', items: projects.filter((p) => p.kind === 'Tool' || p.kind === 'Library') },
-  { title: 'Experiments', items: projects.filter((p) => p.kind === 'Experiment') },
+  { title: 'Products', items: projects.filter((p) => p.kind === 'Product') },
+  { title: 'Client work', items: projects.filter((p) => p.kind === 'Client work') },
+  { title: 'Earlier', items: projects.filter((p) => p.kind === 'Archived') },
 ];
 ---
 
-<Base title="Work" description="Platforms, tools, libraries and experiments built by Jerin Jacob.">
+<Base title="Work" description="Products and client work by Jerin Jacob: PracMind, Getaix and React dashboards.">
   <PageHeader
     label="Work"
     title="Things I've built."
-    intro="From the largest App Inventor extension marketplace to face recognition and playful web toys. Here's a map of what I've shipped."
+    intro="A healthcare platform on Google Cloud, a marketplace used by 500+ developers, and dashboards for clients in Canada and the US."
   />
 
   {
@@ -24,30 +24,37 @@ const groups = [
           {g.title} <span class="count">({g.items.length})</span>
         </h2>
         <ul class="list">
-          {g.items.map((p) => (
-            <li class="row" data-reveal data-cursor={p.href ? 'Visit' : 'Code'}>
-              <a href={p.href ?? p.repo} target="_blank" rel="noopener">
-                <span class="year">{p.year}</span>
-                <span class="main">
-                  <span class="name">{p.name}</span>
-                  <span class="summary">{p.summary}</span>
-                  {p.details && (
-                    <ul class="details">
-                      {p.details.map((d) => (
-                        <li>{d}</li>
-                      ))}
-                    </ul>
-                  )}
-                </span>
-                <span class="stack">
-                  {p.stack.map((t) => (
-                    <span class="chip">{t}</span>
-                  ))}
-                </span>
-                <span class="arrow" aria-hidden="true">↗</span>
-              </a>
-            </li>
-          ))}
+          {g.items.map((p) => {
+            const Tag = p.href ? 'a' : 'div';
+            return (
+              <li class:list={['row', { archived: p.kind === 'Archived' }]} data-reveal data-cursor={p.href ? 'Visit' : undefined}>
+                <Tag class="row-inner" {...(p.href ? { href: p.href, target: '_blank', rel: 'noopener' } : {})}>
+                  <span class="year">{p.year}</span>
+                  <span class="main">
+                    <span class="name">
+                      {p.name}
+                      {p.status && <span class="status chip">{p.status}</span>}
+                    </span>
+                    <span class="role">{p.role}</span>
+                    <span class="summary">{p.summary}</span>
+                    {p.highlights.length > 0 && (
+                      <ul class="details">
+                        {p.highlights.map((d) => (
+                          <li>{d}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </span>
+                  <span class="stack">
+                    {p.stack.map((t) => (
+                      <span class="chip">{t}</span>
+                    ))}
+                  </span>
+                  <span class="arrow" aria-hidden="true">{p.href ? '↗' : ''}</span>
+                </Tag>
+              </li>
+            );
+          })}
         </ul>
       </section>
     ))
@@ -78,7 +85,7 @@ const groups = [
     border-bottom: 1px solid var(--line);
   }
 
-  .row a {
+  .row-inner {
     display: grid;
     gap: 1rem;
     padding: 2rem 0;
@@ -87,14 +94,14 @@ const groups = [
   }
 
   @media (min-width: 900px) {
-    .row a {
+    .row-inner {
       grid-template-columns: 7rem 1fr 16rem 2rem;
       align-items: start;
       padding: 2.5rem 1rem;
     }
   }
 
-  .row a::before {
+  .row-inner::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -104,7 +111,7 @@ const groups = [
     transition: clip-path 0.6s var(--ease);
   }
 
-  .row a:hover::before {
+  a.row-inner:hover::before {
     clip-path: inset(0 0 0 0);
   }
 
@@ -129,9 +136,26 @@ const groups = [
     transition: color 0.3s var(--ease), transform 0.5s var(--ease);
   }
 
-  .row a:hover .name {
+  a.row-inner:hover .name {
     color: var(--accent);
     transform: translateX(0.5rem);
+  }
+
+  .role {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--accent);
+  }
+
+  .status {
+    font-size: 0.68rem;
+    vertical-align: middle;
+    margin-left: 0.75rem;
+    letter-spacing: 0;
+  }
+
+  .row.archived .name {
+    color: var(--muted);
   }
 
   .summary {
@@ -170,7 +194,7 @@ const groups = [
     }
   }
 
-  .row a:hover .arrow {
+  a.row-inner:hover .arrow {
     color: var(--accent);
     transform: translate(0.25rem, -0.25rem);
   }

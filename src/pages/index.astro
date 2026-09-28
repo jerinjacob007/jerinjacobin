@@ -4,11 +4,10 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Gear from '../components/Gear.astro';
 import PostCard from '../components/PostCard.astro';
-import { profile, projects, skills } from '../data/profile';
+import { profile, projects, skills, stats, testimonial } from '../data/profile';
 
 const featured = projects.filter((p) => p.featured);
 const marqueeItems = Object.values(skills).flat();
-const years = new Date().getFullYear() - profile.githubJoined;
 const posts = (await getCollection('blog', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 3);
@@ -17,20 +16,20 @@ const services = [
   {
     n: '01',
     title: 'Full-stack products',
-    text: 'Scalable React and Next.js front ends backed by Node.js: from first prototype to enterprise-level product.',
-    tags: ['React', 'Next.js', 'Node.js', 'TypeScript'],
+    text: 'Dashboards, marketplaces and SaaS platforms with React, Next.js and Node.js, from first commit to production.',
+    tags: ['React', 'Next.js', 'Node.js'],
   },
   {
     n: '02',
-    title: 'No-code platforms',
-    text: 'Marketplaces, app builders, extensions and block generators for MIT App Inventor, Kodular and their clones.',
-    tags: ['Getaix', 'Casagbic', 'Extensions'],
+    title: 'Secure cloud apps',
+    text: 'Apps that handle sensitive data on Google Cloud, designed around compliance requirements like HIPAA from day one.',
+    tags: ['Google Cloud', 'HIPAA', 'Multi-tenant'],
   },
   {
     n: '03',
-    title: 'Tools & experiments',
-    text: 'Developer utilities, computer-vision tools and playful web experiences, built to scratch real itches.',
-    tags: ['Python', 'Svelte', 'InsightFace'],
+    title: 'Performance & delivery',
+    text: 'Faster load times, clean and reviewable code, and CI/CD pipelines that make shipping boring, in the best way.',
+    tags: ['Optimisation', 'Azure Pipelines', 'Jenkins'],
   },
 ];
 ---
@@ -84,21 +83,17 @@ const services = [
   <section class="section wrap statement">
     <p class="label">About me</p>
     <p class="statement-text" data-fill>
-      {profile.motto} I love to learn, build and experiment, and to help others step into the world of programming.
+      {profile.motto} I turn complex requirements into intuitive, fast applications, and I care about the people who use them.
     </p>
     <div class="stats">
-      <div class="stat" data-reveal>
-        <span class="stat-num"><span data-count={years}>{years}</span>+</span>
-        <span class="label">Years on GitHub</span>
-      </div>
-      <div class="stat" data-reveal>
-        <span class="stat-num"><span data-count={profile.publicRepos}>{profile.publicRepos}</span></span>
-        <span class="label">Public repositories</span>
-      </div>
-      <div class="stat" data-reveal>
-        <span class="stat-num">#<span data-count="1">1</span></span>
-        <span class="label">App Inventor extension marketplace</span>
-      </div>
+      {
+        stats.map((st) => (
+          <div class="stat" data-reveal>
+            <span class="stat-num"><span data-count={st.value}>{st.value}</span>{st.suffix}</span>
+            <span class="label">{st.label}</span>
+          </div>
+        ))
+      }
     </div>
     <a href={url('/about/')} class="btn" data-magnetic data-reveal>More about me →</a>
   </section>
@@ -109,26 +104,34 @@ const services = [
       <div class="work-intro">
         <p class="label">Selected work</p>
         <h2 class="section-title">Things<br />I've <span class="accent">built</span></h2>
-        <p class="muted">Platforms, tools and libraries, from the App Inventor ecosystem to computer vision.</p>
+        <p class="muted">Products I built and run, and client work for teams in Canada and the US.</p>
         <a href={url('/projects/')} class="btn" data-magnetic>All projects →</a>
       </div>
       {
         featured.map((p, i) => (
-          <article class="card" data-hscroll-card data-cursor={p.href ? 'Visit' : 'Code'}>
+          <article class:list={['card', { archived: p.kind === 'Archived' }]} data-hscroll-card data-cursor={p.href ? 'Visit' : undefined}>
             <div class="card-top">
               <span class="card-index">{String(i + 1).padStart(2, '0')}</span>
-              <span class="chip">{p.kind}</span>
+              <span class="chip">{p.status ?? p.kind}</span>
             </div>
             <h3 class="card-title">{p.name}</h3>
+            <p class="card-role">{p.role}</p>
             <p class="card-text">{p.summary}</p>
+            <ul class="card-points">
+              {p.highlights.slice(0, 2).map((h) => (
+                <li>{h}</li>
+              ))}
+            </ul>
             <ul class="card-tags">
               {p.stack.map((t) => (
                 <li class="chip">{t}</li>
               ))}
             </ul>
-            <a class="card-link" href={p.href ?? p.repo} target="_blank" rel="noopener">
-              {p.href ? 'Visit site' : 'View code'} ↗
-            </a>
+            {p.href && (
+              <a class="card-link" href={p.href} target="_blank" rel="noopener">
+                Visit site ↗
+              </a>
+            )}
           </article>
         ))
       }
@@ -155,6 +158,15 @@ const services = [
         ))
       }
     </div>
+  </section>
+
+  <!-- TESTIMONIAL -->
+  <section class="section wrap quote-section">
+    <figure class="quote" data-reveal>
+      <span class="quote-mark" aria-hidden="true">“</span>
+      <blockquote data-fill>{testimonial.quote}</blockquote>
+      <figcaption class="label">{testimonial.name} · {testimonial.role}</figcaption>
+    </figure>
   </section>
 
   <!-- WRITING -->
@@ -440,8 +452,36 @@ const services = [
   }
 
   .card-title {
-    font-size: clamp(2.25rem, 4vw, 3.5rem);
+    font-size: clamp(2rem, 3.4vw, 3rem);
     margin-top: auto;
+  }
+
+  .card-role {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-top: -0.5rem;
+  }
+
+  .card-points {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--muted);
+    font-size: 0.92rem;
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .card-points li::marker {
+    color: var(--accent);
+  }
+
+  .card.archived {
+    opacity: 0.75;
+  }
+
+  .card.archived .card-title {
+    color: var(--muted);
   }
 
   .card-text {
@@ -467,6 +507,33 @@ const services = [
     content: '';
     position: absolute;
     inset: 0;
+  }
+
+  /* TESTIMONIAL */
+  .quote {
+    margin: 0;
+    max-width: 60rem;
+    position: relative;
+    padding-left: clamp(0rem, 4vw, 3rem);
+  }
+
+  .quote-mark {
+    position: absolute;
+    left: -0.5rem;
+    top: -3.5rem;
+    font-size: 10rem;
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.35;
+    font-weight: 800;
+  }
+
+  .quote blockquote {
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.6rem, 4vw, 3.25rem);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    font-weight: 600;
   }
 
   /* SERVICES */
