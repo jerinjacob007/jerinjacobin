@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import Gear from '../components/Gear.astro';
+---
+
+<Base title="Page not found">
+  <section class="wrap nf">
+    <div class="gears" aria-hidden="true">
+      <div class="g1"><Gear teeth={20} /></div>
+      <div class="g2"><Gear teeth={10} size={200} /></div>
+    </div>
+    <p class="label"><span class="dot"></span>Error 404</p>
+    <h1 data-split>This part slipped a gear.</h1>
+    <p class="muted" data-reveal>The page you're looking for doesn't exist or has moved.</p>
+    <a href="/" class="btn primary" data-magnetic data-reveal>Take me home →</a>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    min-height: 90svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding-top: 8rem;
+    position: relative;
+    overflow-x: clip;
+  }
+
+  h1 {
+    font-size: clamp(3rem, 10vw, 8rem);
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 0.95;
+    max-width: 12ch;
+  }
+
+  .muted {
+    color: var(--muted);
+  }
+
+  .gears {
+    position: absolute;
+    right: var(--gutter);
+    top: 20%;
+    width: min(40vw, 380px);
+    color: rgba(255, 122, 26, 0.35);
+    z-index: -1;
+  }
+
+  .g2 {
+    position: absolute;
+    width: 50%;
+    right: -30%;
+    bottom: -25%;
+    color: rgba(243, 236, 225, 0.2);
+  }
+</style>

@@ -1,0 +1,37 @@
+---
+interface Props {
+  label: string;
+  title: string;
+  intro?: string;
+}
+
+const { label, title, intro } = Astro.props;
+---
+
+<header class="page-header wrap">
+  <p class="label" data-reveal><span class="dot"></span>{label}</p>
+  <h1 data-split>{title}</h1>
+  {intro && <p class="intro" data-reveal>{intro}</p>}
+</header>
+
+<style>
+  .page-header {
+    padding-top: clamp(8rem, 18vw, 12rem);
+    padding-bottom: clamp(3rem, 6vw, 5rem);
+  }
+
+  h1 {
+    font-size: clamp(3.25rem, 11vw, 9rem);
+    line-height: 0.92;
+    letter-spacing: -0.05em;
+    font-weight: 800;
+    margin-block: 1.25rem 1.5rem;
+    max-width: 14ch;
+  }
+
+  .intro {
+    max-width: 40rem;
+    color: var(--muted);
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  }
+</style>

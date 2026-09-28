@@ -1,0 +1,82 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const date = post.data.pubDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+---
+
+<a class="post" href={`/blog/${post.id}/`} data-reveal>
+  <time class="label" datetime={post.data.pubDate.toISOString()}>{date}</time>
+  <div class="post-body">
+    <h3>{post.data.title}</h3>
+    <p>{post.data.description}</p>
+  </div>
+  <span class="arrow" aria-hidden="true">→</span>
+</a>
+
+<style>
+  .post {
+    display: grid;
+    gap: 0.75rem 2rem;
+    align-items: center;
+    padding: 2rem 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    isolation: isolate;
+  }
+
+  .post + :global(.post) {
+    border-top: 0;
+  }
+
+  @media (min-width: 720px) {
+    .post {
+      grid-template-columns: 10rem 1fr auto;
+      padding: 2.5rem 1rem;
+    }
+  }
+
+  .post::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--bg-2);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.5s var(--ease);
+  }
+
+  .post:hover::before {
+    transform: scaleY(1);
+  }
+
+  h3 {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    margin-bottom: 0.5rem;
+    transition: color 0.3s var(--ease);
+  }
+
+  .post:hover h3 {
+    color: var(--accent);
+  }
+
+  p {
+    color: var(--muted);
+  }
+
+  .arrow {
+    font-size: 2rem;
+    transition: transform 0.4s var(--ease);
+  }
+
+  .post:hover .arrow {
+    transform: translateX(0.5rem) rotate(-45deg);
+    color: var(--accent);
+  }
+</style>

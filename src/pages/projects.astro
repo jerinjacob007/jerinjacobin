@@ -1,0 +1,177 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { projects } from '../data/profile';
+
+const groups = [
+  { title: 'Platforms', items: projects.filter((p) => p.kind === 'Platform') },
+  { title: 'Tools & libraries', items: projects.filter((p) => p.kind === 'Tool' || p.kind === 'Library') },
+  { title: 'Experiments', items: projects.filter((p) => p.kind === 'Experiment') },
+];
+---
+
+<Base title="Work" description="Platforms, tools, libraries and experiments built by Jerin Jacob.">
+  <PageHeader
+    label="Work"
+    title="Things I've built."
+    intro="From the largest App Inventor extension marketplace to face recognition and playful web toys. Here's a map of what I've shipped."
+  />
+
+  {
+    groups.map((g) => (
+      <section class="group wrap">
+        <h2 class="group-title label" data-reveal>
+          {g.title} <span class="count">({g.items.length})</span>
+        </h2>
+        <ul class="list">
+          {g.items.map((p) => (
+            <li class="row" data-reveal>
+              <a href={p.href ?? p.repo} target="_blank" rel="noopener">
+                <span class="year">{p.year}</span>
+                <span class="main">
+                  <span class="name">{p.name}</span>
+                  <span class="summary">{p.summary}</span>
+                  {p.details && (
+                    <ul class="details">
+                      {p.details.map((d) => (
+                        <li>{d}</li>
+                      ))}
+                    </ul>
+                  )}
+                </span>
+                <span class="stack">
+                  {p.stack.map((t) => (
+                    <span class="chip">{t}</span>
+                  ))}
+                </span>
+                <span class="arrow" aria-hidden="true">↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</Base>
+
+<style>
+  .group {
+    padding-bottom: clamp(3rem, 8vw, 6rem);
+  }
+
+  .group-title {
+    padding-bottom: 1rem;
+  }
+
+  .count {
+    color: var(--accent);
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .row {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .row a {
+    display: grid;
+    gap: 1rem;
+    padding: 2rem 0;
+    position: relative;
+    isolation: isolate;
+  }
+
+  @media (min-width: 900px) {
+    .row a {
+      grid-template-columns: 7rem 1fr 16rem 2rem;
+      align-items: start;
+      padding: 2.5rem 1rem;
+    }
+  }
+
+  .row a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, rgba(255, 122, 26, 0.12), transparent 70%);
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.6s var(--ease);
+  }
+
+  .row a:hover::before {
+    clip-path: inset(0 0 0 0);
+  }
+
+  .year {
+    font-family: var(--font-mono);
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding-top: 0.6rem;
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .name {
+    font-size: clamp(2rem, 5vw, 3.75rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    transition: color 0.3s var(--ease), transform 0.5s var(--ease);
+  }
+
+  .row a:hover .name {
+    color: var(--accent);
+    transform: translateX(0.5rem);
+  }
+
+  .summary {
+    color: var(--muted);
+    max-width: 44rem;
+  }
+
+  .details {
+    margin: 0.25rem 0 0;
+    padding-left: 1.1rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .details li::marker {
+    color: var(--accent);
+  }
+
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-content: flex-start;
+    padding-top: 0.4rem;
+  }
+
+  .arrow {
+    display: none;
+    font-size: 1.75rem;
+    transition: transform 0.4s var(--ease), color 0.3s;
+  }
+
+  @media (min-width: 900px) {
+    .arrow {
+      display: block;
+    }
+  }
+
+  .row a:hover .arrow {
+    color: var(--accent);
+    transform: translate(0.25rem, -0.25rem);
+  }
+</style>

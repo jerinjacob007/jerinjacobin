@@ -1,0 +1,522 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Gear from '../components/Gear.astro';
+import PostCard from '../components/PostCard.astro';
+import { profile, projects, skills } from '../data/profile';
+
+const featured = projects.filter((p) => p.featured);
+const marqueeItems = Object.values(skills).flat();
+const years = new Date().getFullYear() - profile.githubJoined;
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+
+const services = [
+  {
+    n: '01',
+    title: 'Full-stack products',
+    text: 'Scalable React and Next.js front ends backed by Node.js: from first prototype to enterprise-level product.',
+    tags: ['React', 'Next.js', 'Node.js', 'TypeScript'],
+  },
+  {
+    n: '02',
+    title: 'No-code platforms',
+    text: 'Marketplaces, app builders, extensions and block generators for MIT App Inventor, Kodular and their clones.',
+    tags: ['Getaix', 'Casagbic', 'Extensions'],
+  },
+  {
+    n: '03',
+    title: 'Tools & experiments',
+    text: 'Developer utilities, computer-vision tools and playful web experiences, built to scratch real itches.',
+    tags: ['Python', 'Svelte', 'InsightFace'],
+  },
+];
+---
+
+<Base>
+  <!-- HERO -->
+  <section class="hero wrap">
+    <div class="hero-copy">
+      <p class="label" data-hero="fade">
+        <span class="dot"></span>{profile.location} · {profile.available ? 'Available for work' : 'Currently busy'}
+      </p>
+      <h1 class="hero-name" data-hero="name">{profile.firstName}<br />{profile.lastName}<span class="accent">.</span></h1>
+      <p class="hero-role" data-hero="fade">{profile.role}</p>
+      <p class="hero-tagline" data-hero="fade">{profile.tagline}</p>
+      <div class="hero-actions" data-hero="fade">
+        <a href="/projects/" class="btn primary" data-magnetic>See my work →</a>
+        <a href="/blog/" class="btn" data-magnetic>Read the blog</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-gear" data-hero="gear"><Gear teeth={24} /></div>
+      <div class="hero-gear small" data-hero="gear"><Gear teeth={12} size={200} /></div>
+      <figure class="hero-photo" data-hero="photo">
+        <img src="/avatar.webp" alt={`Portrait of ${profile.name}`} width="440" height="440" fetchpriority="high" />
+      </figure>
+    </div>
+
+    <p class="scroll-hint label" data-hero="fade" aria-hidden="true">Scroll ↓</p>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee" aria-label="Skills">
+    <div class="marquee-track" data-marquee>
+      {
+        [0, 1].map((copy) => (
+          <ul aria-hidden={copy === 1 ? 'true' : undefined}>
+            {marqueeItems.map((s) => (
+              <li>
+                {s}
+                <span class="star">✦</span>
+              </li>
+            ))}
+          </ul>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- ABOUT STATEMENT -->
+  <section class="section wrap statement">
+    <p class="label">About me</p>
+    <p class="statement-text" data-fill>
+      {profile.motto} I love to learn, build and experiment, and to help others step into the world of programming.
+    </p>
+    <div class="stats">
+      <div class="stat" data-reveal>
+        <span class="stat-num"><span data-count={years}>{years}</span>+</span>
+        <span class="label">Years on GitHub</span>
+      </div>
+      <div class="stat" data-reveal>
+        <span class="stat-num"><span data-count={profile.publicRepos}>{profile.publicRepos}</span></span>
+        <span class="label">Public repositories</span>
+      </div>
+      <div class="stat" data-reveal>
+        <span class="stat-num">#<span data-count="1">1</span></span>
+        <span class="label">App Inventor extension marketplace</span>
+      </div>
+    </div>
+    <a href="/about/" class="btn" data-magnetic data-reveal>More about me →</a>
+  </section>
+
+  <!-- FEATURED WORK (pinned horizontal scroll on desktop) -->
+  <section class="work" data-hscroll>
+    <div class="work-track" data-hscroll-track>
+      <div class="work-intro">
+        <p class="label">Selected work</p>
+        <h2 class="section-title">Things<br />I've <span class="accent">built</span></h2>
+        <p class="muted">Platforms, tools and libraries, from the App Inventor ecosystem to computer vision.</p>
+        <a href="/projects/" class="btn" data-magnetic>All projects →</a>
+      </div>
+      {
+        featured.map((p, i) => (
+          <article class="card" data-hscroll-card>
+            <div class="card-top">
+              <span class="card-index">{String(i + 1).padStart(2, '0')}</span>
+              <span class="chip">{p.kind}</span>
+            </div>
+            <h3 class="card-title">{p.name}</h3>
+            <p class="card-text">{p.summary}</p>
+            <ul class="card-tags">
+              {p.stack.map((t) => (
+                <li class="chip">{t}</li>
+              ))}
+            </ul>
+            <a class="card-link" href={p.href ?? p.repo} target="_blank" rel="noopener">
+              {p.href ? 'Visit site' : 'View code'} ↗
+            </a>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section wrap">
+    <p class="label">What I do</p>
+    <h2 class="section-title" data-split>From idea to shipped product.</h2>
+    <div class="services">
+      {
+        services.map((s) => (
+          <article class="service" data-reveal>
+            <span class="service-n">{s.n}</span>
+            <h3>{s.title}</h3>
+            <p>{s.text}</p>
+            <ul class="card-tags">
+              {s.tags.map((t) => (
+                <li class="chip">{t}</li>
+              ))}
+            </ul>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- WRITING -->
+  <section class="section wrap writing">
+    <div class="writing-head">
+      <div>
+        <p class="label">Writing</p>
+        <h2 class="section-title" data-split>Latest from the blog</h2>
+      </div>
+      <a href="/blog/" class="btn" data-magnetic>All posts →</a>
+    </div>
+    <div class="posts">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .muted {
+    color: var(--muted);
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100svh;
+    display: grid;
+    align-items: center;
+    gap: 2rem;
+    padding-top: 7rem;
+    padding-bottom: 4rem;
+    position: relative;
+    overflow-x: clip;
+  }
+
+  @media (min-width: 900px) {
+    .hero {
+      grid-template-columns: 1.3fr 1fr;
+    }
+  }
+
+  .hero-name {
+    font-size: clamp(4.5rem, 17vw, 13rem);
+    line-height: 0.86;
+    letter-spacing: -0.06em;
+    font-weight: 800;
+    margin-block: 1.5rem;
+  }
+
+  .hero-role {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+    margin-bottom: 1rem;
+  }
+
+  .hero-tagline {
+    max-width: 34rem;
+    color: var(--muted);
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  .hero-visual {
+    position: relative;
+    aspect-ratio: 1;
+    width: min(100%, 460px);
+    justify-self: center;
+    display: grid;
+    place-items: center;
+  }
+
+  .hero-gear {
+    position: absolute;
+    inset: -12%;
+    color: rgba(255, 122, 26, 0.45);
+  }
+
+  .hero-gear.small {
+    inset: auto -14% -10% auto;
+    width: 42%;
+    color: rgba(243, 236, 225, 0.25);
+  }
+
+  .hero-photo {
+    margin: 0;
+    width: 72%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 40px 120px -30px rgba(255, 122, 26, 0.45);
+  }
+
+  .hero-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: var(--gutter);
+  }
+
+  /* MARQUEE */
+  .marquee {
+    overflow: hidden;
+    border-block: 1px solid var(--line);
+    padding-block: 1.5rem;
+    background: var(--bg-2);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+  }
+
+  .marquee ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .marquee li {
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+    padding-inline: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .star {
+    color: var(--accent);
+    font-size: 0.6em;
+  }
+
+  /* STATEMENT */
+  .statement-text {
+    font-size: clamp(1.75rem, 4.6vw, 4rem);
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+    margin-block: 1.5rem 4rem;
+    max-width: 22ch;
+  }
+
+  @media (min-width: 900px) {
+    .statement-text {
+      max-width: 24ch;
+    }
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-2);
+  }
+
+  .stat-num {
+    font-size: clamp(3rem, 6vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    color: var(--accent);
+  }
+
+  /* FEATURED WORK */
+  .work {
+    overflow: hidden;
+  }
+
+  .work-track {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: clamp(4rem, 10vw, 8rem) var(--gutter);
+  }
+
+  @media (min-width: 900px) {
+    .work {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+    }
+
+    .work-track {
+      flex-direction: row;
+      align-items: stretch;
+      width: max-content;
+      gap: 2rem;
+      padding-block: 0;
+    }
+
+    .work-intro {
+      width: 30rem;
+      padding-right: 2rem;
+    }
+
+    .card {
+      width: min(30rem, 38vw);
+    }
+  }
+
+  .work-intro {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .work-intro .section-title {
+    margin-bottom: 0;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    min-height: 26rem;
+    border: 1px solid var(--line);
+    border-radius: calc(var(--radius) * 1.5);
+    background: linear-gradient(160deg, var(--bg-3), var(--bg-2) 60%);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.4s var(--ease);
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    width: 60%;
+    aspect-ratio: 1;
+    right: -20%;
+    top: -20%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 122, 26, 0.25), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s var(--ease);
+  }
+
+  .card:hover {
+    border-color: rgba(255, 122, 26, 0.5);
+  }
+
+  .card:hover::after {
+    opacity: 1;
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-index {
+    font-family: var(--font-mono);
+    color: var(--accent);
+  }
+
+  .card-title {
+    font-size: clamp(2.25rem, 4vw, 3.5rem);
+    margin-top: auto;
+  }
+
+  .card-text {
+    color: var(--muted);
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .card-link {
+    font-weight: 600;
+    color: var(--accent);
+    align-self: flex-start;
+  }
+
+  .card-link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  /* SERVICES */
+  .services {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 900px) {
+    .services {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .service {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .service-n {
+    font-family: var(--font-mono);
+    color: var(--accent);
+  }
+
+  .service h3 {
+    font-size: clamp(1.6rem, 2.5vw, 2.1rem);
+  }
+
+  .service p {
+    color: var(--muted);
+  }
+
+  /* WRITING */
+  .writing-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .writing-head .section-title {
+    margin-bottom: 0;
+  }
+
+  .posts {
+    display: grid;
+    gap: 1rem;
+  }
+</style>

@@ -1,0 +1,139 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { profile } from '../data/profile';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = profile.bio } = Astro.props;
+const pageTitle = title ? `${title} | ${profile.name}` : `${profile.name} | ${profile.role}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL('/avatar.jpg', Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#0f0d0b" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+
+    <!-- Mark JS as available so animated elements start hidden; if the
+         animation script hasn't taken over within 3s, show everything. -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      setTimeout(() => {
+        if (!document.documentElement.classList.contains('anim-ready')) {
+          document.documentElement.classList.remove('js');
+        }
+      }, 3000);
+    </script>
+
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip sr-only" href="#main">Skip to content</a>
+    <div class="cursor" aria-hidden="true" transition:persist="cursor">
+      <div class="cursor-dot"></div>
+      <div class="cursor-ring"></div>
+    </div>
+
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      import '../scripts/animations';
+    </script>
+  </body>
+</html>
+
+<style>
+  .skip:focus {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    width: auto;
+    height: auto;
+    clip: auto;
+    z-index: 100;
+    padding: 0.5rem 1rem;
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 8px;
+  }
+
+  .cursor {
+    display: none;
+  }
+
+  @media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .cursor {
+      display: block;
+    }
+
+    .cursor-dot,
+    .cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 90;
+      pointer-events: none;
+      border-radius: 50%;
+      opacity: 0;
+    }
+
+    .cursor-dot {
+      width: 8px;
+      height: 8px;
+      margin: -4px 0 0 -4px;
+      background: var(--accent);
+    }
+
+    .cursor-ring {
+      width: 40px;
+      height: 40px;
+      margin: -20px 0 0 -20px;
+      border: 1px solid rgba(243, 236, 225, 0.5);
+      transition:
+        width 0.35s var(--ease),
+        height 0.35s var(--ease),
+        margin 0.35s var(--ease),
+        background-color 0.35s var(--ease),
+        border-color 0.35s var(--ease);
+    }
+
+    .cursor.is-hover .cursor-ring {
+      width: 72px;
+      height: 72px;
+      margin: -36px 0 0 -36px;
+      background: rgba(255, 122, 26, 0.12);
+      border-color: var(--accent);
+    }
+  }
+</style>

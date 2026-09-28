@@ -1,0 +1,91 @@
+---
+import { profile } from '../data/profile';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="cta" data-reveal>
+      <p class="label"><span class="dot"></span>{profile.available ? 'Open to new projects' : 'Say hello'}</p>
+      <h2 class="cta-title">
+        Let's build<br /><span class="accent">something.</span>
+      </h2>
+      <div class="cta-actions">
+        {
+          profile.email && (
+            <a class="btn primary" href={`mailto:${profile.email}`} data-magnetic>
+              {profile.email}
+            </a>
+          )
+        }
+        <a class="btn" href="https://github.com/jerinjacob007" target="_blank" rel="noopener" data-magnetic>
+          Find me on GitHub ↗
+        </a>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <ul class="socials">
+        {
+          profile.socials.map((s) => (
+            <li>
+              <a href={s.href} target="_blank" rel="noopener">
+                {s.label} ↗
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="label">© {year} {profile.name} · {profile.location} · Built with Astro + GSAP</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--line);
+    padding-block: clamp(4rem, 10vw, 8rem) 2rem;
+    background: radial-gradient(ellipse at 50% 120%, rgba(255, 122, 26, 0.16), transparent 60%);
+  }
+
+  .cta-title {
+    font-size: clamp(3rem, 12vw, 10rem);
+    margin-block: 1rem 2.5rem;
+  }
+
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .bottom {
+    margin-top: clamp(4rem, 10vw, 7rem);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .socials a {
+    color: var(--muted);
+    transition: color 0.3s var(--ease);
+  }
+
+  .socials a:hover {
+    color: var(--accent);
+  }
+</style>

@@ -1,0 +1,171 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const date = post.data.pubDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+const words = post.body?.split(/\s+/).length ?? 0;
+const minutes = Math.max(1, Math.round(words / 220));
+---
+
+<Base title={post.data.title} description={post.data.description}>
+  <div class="progress" data-progress aria-hidden="true"></div>
+  <article class="wrap article" data-article>
+    <header>
+      <a href="/blog/" class="label back">← All posts</a>
+      <p class="label meta" data-reveal>
+        <time datetime={post.data.pubDate.toISOString()}>{date}</time> · {minutes} min read
+      </p>
+      <h1 data-split>{post.data.title}</h1>
+      <p class="desc" data-reveal>{post.data.description}</p>
+      {
+        post.data.tags.length > 0 && (
+          <ul class="tags" data-reveal>
+            {post.data.tags.map((t) => (
+              <li class="chip">#{t}</li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+    <div class="prose" data-reveal>
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+    transform-origin: left;
+    transform: scaleX(0);
+    z-index: 60;
+  }
+
+  .article {
+    max-width: 52rem;
+    padding-top: clamp(8rem, 16vw, 11rem);
+    padding-bottom: clamp(4rem, 10vw, 8rem);
+  }
+
+  .back {
+    display: inline-block;
+    margin-bottom: 2rem;
+    transition: color 0.3s;
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    letter-spacing: -0.045em;
+    line-height: 0.98;
+    font-weight: 800;
+    margin-block: 1rem 1.5rem;
+  }
+
+  .desc {
+    color: var(--muted);
+    font-size: clamp(1.1rem, 1.8vw, 1.35rem);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+  }
+
+  .prose {
+    margin-top: 3rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--line);
+    font-size: clamp(1.05rem, 1.3vw, 1.18rem);
+    line-height: 1.75;
+    color: #e2d9cb;
+  }
+
+  .prose > :global(* + *) {
+    margin-top: 1.25em;
+  }
+
+  .prose :global(h2) {
+    font-size: clamp(1.6rem, 3vw, 2.25rem);
+    margin-top: 2.25em;
+    color: var(--ink);
+  }
+
+  .prose :global(h3) {
+    font-size: 1.4rem;
+    margin-top: 2em;
+  }
+
+  .prose :global(a) {
+    color: var(--ink);
+    border-bottom: 1px solid var(--accent);
+    transition: color 0.3s;
+  }
+
+  .prose :global(a:hover) {
+    color: var(--accent);
+  }
+
+  .prose :global(strong) {
+    color: var(--ink);
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 1.25rem;
+  }
+
+  .prose :global(li + li) {
+    margin-top: 0.4em;
+  }
+
+  .prose :global(li::marker) {
+    color: var(--accent);
+  }
+
+  .prose :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+  }
+
+  .prose :global(:not(pre) > code) {
+    background: var(--bg-3);
+    padding: 0.15em 0.4em;
+    border-radius: 6px;
+  }
+
+  .prose :global(pre) {
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    overflow-x: auto;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .prose :global(blockquote) {
+    margin-inline: 0;
+    padding-left: 1.25rem;
+    border-left: 3px solid var(--accent);
+    color: var(--muted);
+  }
+</style>
