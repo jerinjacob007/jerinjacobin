@@ -1,4 +1,5 @@
 ---
+import { url } from '../utils/url';
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Gear from '../components/Gear.astro';
@@ -45,8 +46,8 @@ const services = [
       <p class="hero-role" data-hero="fade">{profile.role}</p>
       <p class="hero-tagline" data-hero="fade">{profile.tagline}</p>
       <div class="hero-actions" data-hero="fade">
-        <a href="/projects/" class="btn primary" data-magnetic>See my work →</a>
-        <a href="/blog/" class="btn" data-magnetic>Read the blog</a>
+        <a href={url('/projects/')} class="btn primary" data-magnetic>See my work →</a>
+        <a href={url('/blog/')} class="btn" data-magnetic>Read the blog</a>
       </div>
     </div>
 
@@ -54,7 +55,7 @@ const services = [
       <div class="hero-gear" data-hero="gear"><Gear teeth={24} /></div>
       <div class="hero-gear small" data-hero="gear"><Gear teeth={12} size={200} /></div>
       <figure class="hero-photo" data-hero="photo">
-        <img src="/avatar.webp" alt={`Portrait of ${profile.name}`} width="440" height="440" fetchpriority="high" />
+        <img src={url('/avatar.webp')} alt={`Portrait of ${profile.name}`} width="440" height="440" fetchpriority="high" />
       </figure>
     </div>
 
@@ -99,7 +100,7 @@ const services = [
         <span class="label">App Inventor extension marketplace</span>
       </div>
     </div>
-    <a href="/about/" class="btn" data-magnetic data-reveal>More about me →</a>
+    <a href={url('/about/')} class="btn" data-magnetic data-reveal>More about me →</a>
   </section>
 
   <!-- FEATURED WORK (pinned horizontal scroll on desktop) -->
@@ -109,7 +110,7 @@ const services = [
         <p class="label">Selected work</p>
         <h2 class="section-title">Things<br />I've <span class="accent">built</span></h2>
         <p class="muted">Platforms, tools and libraries, from the App Inventor ecosystem to computer vision.</p>
-        <a href="/projects/" class="btn" data-magnetic>All projects →</a>
+        <a href={url('/projects/')} class="btn" data-magnetic>All projects →</a>
       </div>
       {
         featured.map((p, i) => (
@@ -163,7 +164,7 @@ const services = [
         <p class="label">Writing</p>
         <h2 class="section-title" data-split>Latest from the blog</h2>
       </div>
-      <a href="/blog/" class="btn" data-magnetic>All posts →</a>
+      <a href={url('/blog/')} class="btn" data-magnetic>All posts →</a>
     </div>
     <div class="posts">
       {posts.map((post) => <PostCard post={post} />)}

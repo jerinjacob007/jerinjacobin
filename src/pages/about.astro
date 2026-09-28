@@ -1,4 +1,5 @@
 ---
+import { url } from '../utils/url';
 import Base from '../layouts/Base.astro';
 import PageHeader from '../components/PageHeader.astro';
 import Gear from '../components/Gear.astro';
@@ -10,7 +11,7 @@ import { profile, skills, journey } from '../data/profile';
 
   <section class="wrap intro">
     <figure class="portrait" data-reveal>
-      <img src="/avatar.webp" alt={`Portrait of ${profile.name}`} width="440" height="440" />
+      <img src={url('/avatar.webp')} alt={`Portrait of ${profile.name}`} width="440" height="440" />
       <div class="portrait-gear"><Gear teeth={16} size={240} hole={false} /></div>
     </figure>
     <div class="bio">

@@ -1,4 +1,5 @@
 ---
+import { url } from '../utils/url';
 import { profile } from '../data/profile';
 
 const links = [
@@ -7,12 +8,12 @@ const links = [
   { href: '/blog/', label: 'Blog' },
 ];
 const path = Astro.url.pathname;
-const isActive = (href: string) => path === href || path.startsWith(href);
+const isActive = (href: string) => path.startsWith(url(href));
 ---
 
 <header class="nav" data-nav>
   <div class="wrap nav-inner">
-    <a href="/" class="logo" aria-label={`${profile.name}, home`} data-magnetic>
+    <a href={url('/')} class="logo" aria-label={`${profile.name}, home`} data-magnetic>
       <span class="logo-mark">JJ</span>
       <span class="logo-text">{profile.name}</span>
     </a>
@@ -21,7 +22,7 @@ const isActive = (href: string) => path === href || path.startsWith(href);
         {
           links.map(({ href, label }) => (
             <li>
-              <a href={href} class:list={{ active: isActive(href) }} aria-current={isActive(href) ? 'page' : undefined}>
+              <a href={url(href)} class:list={{ active: isActive(href) }} aria-current={isActive(href) ? 'page' : undefined}>
                 {label}
               </a>
             </li>

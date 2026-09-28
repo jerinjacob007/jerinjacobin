@@ -48,4 +48,10 @@ All motion is set up inside `gsap.matchMedia()`: visitors with `prefers-reduced-
 
 ## Deploy
 
-`pnpm build` outputs plain static files to `dist/`. Deploy to Cloudflare Pages, Netlify, Vercel or GitHub Pages (build command `pnpm build`, output `dist`). Update `site` in `astro.config.mjs` if the domain changes.
+**GitHub Pages (preview):** `.github/workflows/deploy.yml` builds and deploys on every push to `main` or `claude/youthful-hopper-hw3cj3`, to https://jerinjacob007.github.io/jerinjacobin/. One-time setup: repo **Settings → Pages → Source: GitHub Actions**.
+
+The workflow sets `SITE_URL` and `BASE_PATH=/jerinjacobin` because project pages live under a sub-path. Always link internal pages with the `url()` helper (`src/utils/url.ts`) so links work under both `/` and `/jerinjacobin/`.
+
+**Custom domain:** add `public/CNAME` containing `jerinjacob.in`, and remove `SITE_URL` / `BASE_PATH` from the workflow.
+
+`pnpm build` outputs plain static files to `dist/`, so Cloudflare Pages, Netlify or Vercel work too (build command `pnpm build`, output `dist`).
